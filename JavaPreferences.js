@@ -47,6 +47,12 @@ define(function (require, exports, module) {
             type: "Number",
             default: 4
         },
+        "java.gen.gettersAndSetters": {
+            text: "Getters and Setters",
+            description: "Generate Getters and Setters.",
+            type: "Check",
+            default: false
+        },
         "java.rev": {
             text: "Java Reverse Engineering",
             type: "Section"
@@ -89,9 +95,10 @@ define(function (require, exports, module) {
 
     function getGenOptions() {
         return {
-            javaDoc       : PreferenceManager.get("java.gen.javaDoc"),
-            useTab        : PreferenceManager.get("java.gen.useTab"),
-            indentSpaces  : PreferenceManager.get("java.gen.indentSpaces")
+            javaDoc           : PreferenceManager.get("java.gen.javaDoc"),
+            gettersAndSetters : PreferenceManager.get("java.gen.gettersAndSetters"),
+            useTab            : PreferenceManager.get("java.gen.useTab"),
+            indentSpaces      : PreferenceManager.get("java.gen.indentSpaces")
         };
     }
 

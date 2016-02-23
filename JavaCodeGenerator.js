@@ -112,6 +112,7 @@ define(function (require, exports, module) {
                 this.writePackageDeclaration(codeWriter, elem, options);
                 codeWriter.writeLine();
                 codeWriter.writeLine("import java.util.*;");
+                codeWriter.writeLine("import java.lang.*;");
                 codeWriter.writeLine();
                 this.writeAnnotationType(codeWriter, elem, options);
                 file = FileSystem.getFileForPath(fullPath);
@@ -124,6 +125,7 @@ define(function (require, exports, module) {
                 this.writePackageDeclaration(codeWriter, elem, options);
                 codeWriter.writeLine();
                 codeWriter.writeLine("import java.util.*;");
+                codeWriter.writeLine("import java.lang.*;");
                 codeWriter.writeLine();
                 this.writeClass(codeWriter, elem, options);
                 file = FileSystem.getFileForPath(fullPath);
@@ -137,6 +139,7 @@ define(function (require, exports, module) {
             this.writePackageDeclaration(codeWriter, elem, options);
             codeWriter.writeLine();
             codeWriter.writeLine("import java.util.*;");
+            codeWriter.writeLine("import java.lang.*;");
             codeWriter.writeLine();
             this.writeInterface(codeWriter, elem, options);
             file = FileSystem.getFileForPath(fullPath);
@@ -351,6 +354,62 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Write Getter
+     * @param {StringWriter} codeWriter
+     * @param {type.Model} elem
+     * @param {Object} options
+     */
+    JavaCodeGenerator.prototype.writeGetter = function (codeWriter, elem, options) {
+        if (elem.name.length > 0) {
+            // TODO Documentation
+            var signature = [];
+            //Getter is always public
+            signature.push("public");
+            // type
+            signature.push(this.getType(elem));
+            // get
+            signature.push("get" + elem.name.charAt(0).toUpperCase() + elem.name.slice(1));
+            // brackets
+            signature.push("()");
+            codeWriter.writeLine(signature.join(" ") + " {");
+            // body
+            codeWriter.indent();
+            codeWriter.writeLine("return " + elem.name + ";");
+            codeWriter.outdent();
+            codeWriter.writeLine("}");
+            codeWriter.writeLine("");
+        }
+    };
+
+    /**
+     * Write Setter
+     * @param {StringWriter} codeWriter
+     * @param {type.Model} elem
+     * @param {Object} options
+     */
+    JavaCodeGenerator.prototype.writeSetter = function (codeWriter, elem, options) {
+        if (elem.name.length > 0) {
+            // TODO Documentation
+            var signature = [];
+            //Setter is always public
+            signature.push("public");
+            // type
+            signature.push("void");
+            // get
+            signature.push("set" + elem.name.charAt(0).toUpperCase() + elem.name.slice(1));
+            signature.push("(" + this.getType(elem) + " " + elem.name + ")")
+            codeWriter.writeLine(signature.join(" ") + " {");
+            // body
+            codeWriter.indent();
+            codeWriter.writeLine("this." + elem.name + " = " + elem.name + ";");
+            codeWriter.outdent();
+            codeWriter.writeLine("}");
+            codeWriter.writeLine("");
+        }
+    };
+
+
+    /**
      * Write Method
      * @param {StringWriter} codeWriter
      * @param {type.Model} elem
@@ -513,6 +572,26 @@ define(function (require, exports, module) {
             if (asso.end2.reference === elem && asso.end1.navigable === true) {
                 this.writeMemberVariable(codeWriter, asso.end1, options);
                 codeWriter.writeLine();
+            }
+        }
+
+        //Getters and Setters
+        for (i = 0, len = elem.attributes.length; i < len; i++) {
+
+            this.writeGetter(codeWriter, elem.attributes[i], options);
+            this.writeSetter(codeWriter, elem.attributes[i], options);
+            codeWriter.writeLine();
+        }
+        for (i = 0, len = associations.length; i < len; i++) {
+            var asso = associations[i];
+
+            if (asso.end1.reference === elem && asso.end2.navigable === true) {
+                this.writeGetter(codeWriter, asso.end2, options);
+                this.writeSetter(codeWriter, asso.end2, options);
+            }
+            if (asso.end2.reference === elem && asso.end1.navigable === true) {
+                this.writeGetter(codeWriter, asso.end1, options);
+                this.writeSetter(codeWriter, asso.end1, options);
             }
         }
 
