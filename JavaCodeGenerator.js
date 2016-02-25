@@ -89,6 +89,7 @@ define(function (require, exports, module) {
         // Package
         if (elem instanceof type.UMLPackage) {
             fullPath = path + "/" + elem.name;
+            console.log("Path: " + fullPath);
             directory = FileSystem.getDirectoryForPath(fullPath);
             directory.create(function (err, stat) {
                 if (!err) {
@@ -126,6 +127,7 @@ define(function (require, exports, module) {
                 codeWriter.writeLine();
                 codeWriter.writeLine("import java.util.*;");
                 codeWriter.writeLine("import java.lang.*;");
+                // import
                 codeWriter.writeLine();
                 this.writeClass(codeWriter, elem, options);
                 file = FileSystem.getFileForPath(fullPath);
@@ -296,7 +298,7 @@ define(function (require, exports, module) {
     JavaCodeGenerator.prototype.writePackageDeclaration = function (codeWriter, elem, options) {
         var path = null;
         if (elem._parent) {
-            path = _.map(elem._parent.getPath(this.baseModel), function (e) { return e.name; }).join(".");
+            path = _.map(elem._parent.getPath(this.baseModel._parent), function (e) { return e.name; }).join(".");
         }
         if (path) {
             codeWriter.writeLine("package " + path + ";");
@@ -321,6 +323,12 @@ define(function (require, exports, module) {
             }
             terms.push(elem.name + "()");
             codeWriter.writeLine(terms.join(" ") + " {");
+            var _extends = this.getSuperClasses(elem);
+            if (_extends.length > 0) {
+                codeWriter.indent();
+                codeWriter.writeLine("super();");
+                codeWriter.outdent();
+            }
             codeWriter.writeLine("}");
         }
     };
@@ -360,24 +368,30 @@ define(function (require, exports, module) {
      * @param {Object} options
      */
     JavaCodeGenerator.prototype.writeGetter = function (codeWriter, elem, options) {
-        if (elem.name.length > 0) {
-            // TODO Documentation
-            var signature = [];
-            //Getter is always public
-            signature.push("public");
-            // type
-            signature.push(this.getType(elem));
-            // get
-            signature.push("get" + elem.name.charAt(0).toUpperCase() + elem.name.slice(1));
-            // brackets
-            signature.push("()");
-            codeWriter.writeLine(signature.join(" ") + " {");
-            // body
-            codeWriter.indent();
-            codeWriter.writeLine("return " + elem.name + ";");
-            codeWriter.outdent();
-            codeWriter.writeLine("}");
-            codeWriter.writeLine("");
+        if (options.gettersAndSetters) {
+            if (elem.name.length > 0) {
+                // Documentation
+                var doc = "Getter for " + elem.name;
+                doc += "\n@return " + elem.name;
+                this.writeDoc(codeWriter, doc, options);
+                // Method
+                var signature = [];
+                //Getter is always public
+                signature.push("public");
+                // type
+                signature.push(this.getType(elem));
+                // get
+                signature.push("get" + elem.name.charAt(0).toUpperCase() + elem.name.slice(1));
+                // brackets
+                signature.push("()");
+                codeWriter.writeLine(signature.join(" ") + " {");
+                // body
+                codeWriter.indent();
+                codeWriter.writeLine("return " + elem.name + ";");
+                codeWriter.outdent();
+                codeWriter.writeLine("}");
+                codeWriter.writeLine("");
+            }
         }
     };
 
@@ -388,23 +402,29 @@ define(function (require, exports, module) {
      * @param {Object} options
      */
     JavaCodeGenerator.prototype.writeSetter = function (codeWriter, elem, options) {
-        if (elem.name.length > 0) {
-            // TODO Documentation
-            var signature = [];
-            //Setter is always public
-            signature.push("public");
-            // type
-            signature.push("void");
-            // get
-            signature.push("set" + elem.name.charAt(0).toUpperCase() + elem.name.slice(1));
-            signature.push("(" + this.getType(elem) + " " + elem.name + ")")
-            codeWriter.writeLine(signature.join(" ") + " {");
-            // body
-            codeWriter.indent();
-            codeWriter.writeLine("this." + elem.name + " = " + elem.name + ";");
-            codeWriter.outdent();
-            codeWriter.writeLine("}");
-            codeWriter.writeLine("");
+        if (options.gettersAndSetters) {
+            if (elem.name.length > 0) {
+                // Documentation
+                var doc = "Setter for " + elem.name;
+                doc += "\n@param " + elem.name + " to set";
+                this.writeDoc(codeWriter, doc, options);
+                // Method
+                var signature = [];
+                //Setter is always public
+                signature.push("public");
+                // type
+                signature.push("void");
+                // get
+                signature.push("set" + elem.name.charAt(0).toUpperCase() + elem.name.slice(1));
+                signature.push("(" + this.getType(elem) + " " + elem.name + ")")
+                codeWriter.writeLine(signature.join(" ") + " {");
+                // body
+                codeWriter.indent();
+                codeWriter.writeLine("this." + elem.name + " = " + elem.name + ";");
+                codeWriter.outdent();
+                codeWriter.writeLine("}");
+                codeWriter.writeLine("");
+            }
         }
     };
 
