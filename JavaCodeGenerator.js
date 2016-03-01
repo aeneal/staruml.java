@@ -344,6 +344,12 @@ define(function (require, exports, module) {
             var terms = [];
             // doc
             this.writeDoc(codeWriter, elem.documentation, options);
+            // annotations;
+            _.each(elem.tags, function (tag) {
+                if (tag.name === "annotation") {
+                codeWriter.writeLine("@" + tag.value);
+                }
+            });
             // modifiers
             var _modifiers = this.getModifiers(elem);
             if (_modifiers.length > 0) {
