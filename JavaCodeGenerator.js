@@ -111,10 +111,7 @@ define(function (require, exports, module) {
                 fullPath = path + "/" + elem.name + ".java";
                 codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
                 this.writePackageDeclaration(codeWriter, elem, options);
-                codeWriter.writeLine();
-                codeWriter.writeLine("import java.util.*;");
-                codeWriter.writeLine("import java.lang.*;");
-                codeWriter.writeLine();
+                this.writeImports(codeWriter,elem,options);
                 this.writeAnnotationType(codeWriter, elem, options);
                 file = FileSystem.getFileForPath(fullPath);
                 FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
@@ -124,11 +121,7 @@ define(function (require, exports, module) {
                 fullPath = path + "/" + elem.name + ".java";
                 codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
                 this.writePackageDeclaration(codeWriter, elem, options);
-                codeWriter.writeLine();
-                codeWriter.writeLine("import java.util.*;");
-                codeWriter.writeLine("import java.lang.*;");
-                // import
-                codeWriter.writeLine();
+                this.writeImports(codeWriter,elem,options);
                 this.writeClass(codeWriter, elem, options);
                 file = FileSystem.getFileForPath(fullPath);
                 FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
@@ -139,10 +132,7 @@ define(function (require, exports, module) {
             fullPath = path + "/" + elem.name + ".java";
             codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
             this.writePackageDeclaration(codeWriter, elem, options);
-            codeWriter.writeLine();
-            codeWriter.writeLine("import java.util.*;");
-            codeWriter.writeLine("import java.lang.*;");
-            codeWriter.writeLine();
+            this.writeImports(codeWriter,elem,options);
             this.writeInterface(codeWriter, elem, options);
             file = FileSystem.getFileForPath(fullPath);
             FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
@@ -303,6 +293,25 @@ define(function (require, exports, module) {
         if (path) {
             codeWriter.writeLine("package " + path + ";");
         }
+    };
+
+    /**
+     * Write imports
+     * @param {StringWriter} codeWriter
+     * @param {type.Model} elem
+     * @param {Object} options
+     */
+    JavaCodeGenerator.prototype.writeImports = function (codeWriter, elem, options) {
+         codeWriter.writeLine();
+         codeWriter.writeLine("import java.util.*;");
+         codeWriter.writeLine("import java.lang.*;");
+         // imports from tags;
+         _.each(elem.tags, function (tag) {
+             if (tag.name === "import") {
+             codeWriter.writeLine("import " + tag.value + ";");
+             }
+         });
+         codeWriter.writeLine();
     };
 
     /**
