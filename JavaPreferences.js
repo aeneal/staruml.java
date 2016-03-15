@@ -53,6 +53,12 @@ define(function (require, exports, module) {
             type: "Check",
             default: false
         },
+        "java.gen.interfaceMethods": {
+            text: "Interface Methods",
+            description: "Generate Interface Methods.",
+            type: "Check",
+            default: false
+        },
         "java.rev": {
             text: "Java Reverse Engineering",
             type: "Section"
@@ -97,6 +103,7 @@ define(function (require, exports, module) {
         return {
             javaDoc           : PreferenceManager.get("java.gen.javaDoc"),
             gettersAndSetters : PreferenceManager.get("java.gen.gettersAndSetters"),
+            interfaceMethods  : PreferenceManager.get("java.gen.interfaceMethods"),
             useTab            : PreferenceManager.get("java.gen.useTab"),
             indentSpaces      : PreferenceManager.get("java.gen.indentSpaces")
         };

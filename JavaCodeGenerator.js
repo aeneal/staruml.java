@@ -86,70 +86,83 @@ define(function (require, exports, module) {
             codeWriter,
             file;
 
-        // Package
-        if (elem instanceof type.UMLPackage) {
-            fullPath = path + "/" + elem.name;
-            console.log("Path: " + fullPath);
-            directory = FileSystem.getDirectoryForPath(fullPath);
-            directory.create(function (err, stat) {
-                if (!err) {
-                    Async.doSequentially(
-                        elem.ownedElements,
-                        function (child) {
-                            return self.generate(child, fullPath, options);
-                        },
-                        false
-                    ).then(result.resolve, result.reject);
-                } else {
-                    result.reject(err);
-                }
-            });
-        } else if (elem instanceof type.UMLClass) {
-
-            // AnnotationType
-            if (elem.stereotype === "annotationType") {
-                fullPath = path + "/" + elem.name + ".java";
-                codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
-                this.writePackageDeclaration(codeWriter, elem, options);
-                this.writeImports(codeWriter,elem,options);
-                this.writeAnnotationType(codeWriter, elem, options);
-                file = FileSystem.getFileForPath(fullPath);
-                FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
-
-            // Class
-            } else {
-                fullPath = path + "/" + elem.name + ".java";
-                codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
-                this.writePackageDeclaration(codeWriter, elem, options);
-                this.writeImports(codeWriter,elem,options);
-                this.writeClass(codeWriter, elem, options);
-                file = FileSystem.getFileForPath(fullPath);
-                FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
+        // Check if object should be generated;
+        var gen = true;
+        _.each(elem.tags, function (tag) {
+            if (tag.name === "generate" && tag.value === "false") {
+                console.log("Not Generating " + elem.name);
+                gen == false;
             }
+        }, gen);
 
-        // Interface
-        } else if (elem instanceof type.UMLInterface) {
-            fullPath = path + "/" + elem.name + ".java";
-            codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
-            this.writePackageDeclaration(codeWriter, elem, options);
-            this.writeImports(codeWriter,elem,options);
-            this.writeInterface(codeWriter, elem, options);
-            file = FileSystem.getFileForPath(fullPath);
-            FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
+        console.log(gen);
 
-        // Enum
-        } else if (elem instanceof type.UMLEnumeration) {
-            fullPath = path + "/" + elem.name + ".java";
-            codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
-            this.writePackageDeclaration(codeWriter, elem, options);
-            codeWriter.writeLine();
-            this.writeEnum(codeWriter, elem, options);
-            file = FileSystem.getFileForPath(fullPath);
-            FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
+        if (gen === true) {
+            // Package
+            if (elem instanceof type.UMLPackage) {
+                fullPath = path + "/" + elem.name;
+                console.log("Path: " + fullPath);
+                directory = FileSystem.getDirectoryForPath(fullPath);
+                directory.create(function (err, stat) {
+                    if (!err) {
+                        Async.doSequentially(
+                            elem.ownedElements,
+                            function (child) {
+                                return self.generate(child, fullPath, options);
+                            },
+                            false
+                        ).then(result.resolve, result.reject);
+                    } else {
+                        result.reject(err);
+                    }
+                });
+            } else if (elem instanceof type.UMLClass) {
 
-        // Others (Nothing generated.)
-        } else {
-            result.resolve();
+                // AnnotationType
+                if (elem.stereotype === "annotationType") {
+                    fullPath = path + "/" + elem.name + ".java";
+                    codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
+                    this.writePackageDeclaration(codeWriter, elem, options);
+                    this.writeImports(codeWriter,elem,options);
+                    this.writeAnnotationType(codeWriter, elem, options);
+                    file = FileSystem.getFileForPath(fullPath);
+                    FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
+
+                // Class
+                } else {
+                    fullPath = path + "/" + elem.name + ".java";
+                    codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
+                    this.writePackageDeclaration(codeWriter, elem, options);
+                    this.writeImports(codeWriter,elem,options);
+                    this.writeClass(codeWriter, elem, options);
+                    file = FileSystem.getFileForPath(fullPath);
+                    FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
+                }
+
+            // Interface
+            } else if (elem instanceof type.UMLInterface) {
+                fullPath = path + "/" + elem.name + ".java";
+                codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
+                this.writePackageDeclaration(codeWriter, elem, options);
+                this.writeImports(codeWriter,elem,options);
+                this.writeInterface(codeWriter, elem, options);
+                file = FileSystem.getFileForPath(fullPath);
+                FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
+
+            // Enum
+            } else if (elem instanceof type.UMLEnumeration) {
+                fullPath = path + "/" + elem.name + ".java";
+                codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
+                this.writePackageDeclaration(codeWriter, elem, options);
+                codeWriter.writeLine();
+                this.writeEnum(codeWriter, elem, options);
+                file = FileSystem.getFileForPath(fullPath);
+                FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
+
+            // Others (Nothing generated.)
+            } else {
+                result.resolve();
+            }
         }
         return result.promise();
     };
@@ -654,11 +667,13 @@ define(function (require, exports, module) {
             }
         }
 
-        // Interface methods
-        for (var j = 0; j < _implements.length; j++) {
-            for (i = 0, len = _implements[j].operations.length; i < len; i++) {
-                this.writeMethod(codeWriter, _implements[j].operations[i], options, false, false);
-                codeWriter.writeLine();
+        if (options.interfaceMethods) {
+            // Interface methods
+            for (var j = 0; j < _implements.length; j++) {
+                for (i = 0, len = _implements[j].operations.length; i < len; i++) {
+                    this.writeMethod(codeWriter, _implements[j].operations[i], options, false, false);
+                    codeWriter.writeLine();
+                }
             }
         }
 
