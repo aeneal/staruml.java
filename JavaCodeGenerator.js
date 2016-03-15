@@ -556,6 +556,13 @@ define(function (require, exports, module) {
         }
         this.writeDoc(codeWriter, doc, options);
 
+        // annotations;
+        _.each(elem.tags, function (tag) {
+            if (tag.name === "annotation") {
+            codeWriter.writeLine("@" + tag.value);
+            }
+        });
+
         // Modifiers
         var _modifiers = this.getModifiers(elem);
         if ( _.contains(_modifiers, "abstract") !== true && _.some(elem.operations, function (op) { return op.isAbstract === true; })) {
