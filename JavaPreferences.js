@@ -59,6 +59,12 @@ define(function (require, exports, module) {
             type: "Check",
             default: false
         },
+        "java.gen.jacksonTypeSetting": {
+            text: "Jackson Type Setting",
+            description: "Set @type on Interface Methods for Jackson Annotation using full class & path",
+            type: "Check",
+            default: false
+        },
         "java.rev": {
             text: "Java Reverse Engineering",
             type: "Section"
@@ -104,6 +110,7 @@ define(function (require, exports, module) {
             javaDoc           : PreferenceManager.get("java.gen.javaDoc"),
             gettersAndSetters : PreferenceManager.get("java.gen.gettersAndSetters"),
             interfaceMethods  : PreferenceManager.get("java.gen.interfaceMethods"),
+            jacksonTypeSetting: PreferenceManager.get("java.gen.jacksonTypeSetting"),
             useTab            : PreferenceManager.get("java.gen.useTab"),
             indentSpaces      : PreferenceManager.get("java.gen.indentSpaces")
         };

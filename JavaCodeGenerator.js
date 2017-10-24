@@ -324,6 +324,9 @@ define(function (require, exports, module) {
              codeWriter.writeLine("import " + tag.value + ";");
              }
          });
+        if (options.jacksonTypeSetting) {
+            codeWriter.writeLine("import com.fasterxml.jackson.annotation.JsonTypeInfo;");
+        }
          codeWriter.writeLine();
     };
 
@@ -727,6 +730,10 @@ define(function (require, exports, module) {
         var _extends = this.getSuperClasses(elem);
         if (_extends.length > 0) {
             terms.push("extends " + _.map(_extends, function (e) { return e.name; }).join(", "));
+        }
+
+        if (options.jacksonTypeSetting) {
+            codeWriter.writeLine("@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = \"@type\")");
         }
         codeWriter.writeLine(terms.join(" ") + " {");
         codeWriter.writeLine();

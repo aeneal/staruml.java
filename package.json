@@ -5,11 +5,10 @@
     "homepage": "https://github.com/staruml/Java",
     "issues": "https://github.com/staruml/Java/issues",
     "keywords": ["java"],
-    "version": "0.9.4",
+    "version": "0.9.5",
     "author": {
-        "name": "Minkyu Lee",
-        "email": "niklaus.lee@gmail.com",
-        "url": "https://github.com/niklauslee"
+        "name": "Andrew Neal",
+        "url": "https://github.com/aeneal"
     },
     "license": "MIT",
     "engines": {
