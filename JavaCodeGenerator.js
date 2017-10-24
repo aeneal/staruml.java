@@ -732,9 +732,12 @@ define(function (require, exports, module) {
             terms.push("extends " + _.map(_extends, function (e) { return e.name; }).join(", "));
         }
 
-        if (options.jacksonTypeSetting) {
-            codeWriter.writeLine("@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = \"@type\")");
-        }
+        // annotations;
+        _.each(elem.tags, function (tag) {
+            if (tag.name === "annotation") {
+                codeWriter.writeLine("@" + tag.value);
+            }
+        });
         codeWriter.writeLine(terms.join(" ") + " {");
         codeWriter.writeLine();
         codeWriter.indent();
